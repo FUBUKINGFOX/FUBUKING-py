@@ -12,7 +12,7 @@ import youtube_dl
 from youtube_dl import YoutubeDL
 #===============
 from bin import ctc, source,config_loader
-from bin.net import yt_url_exploer
+from plugins.music_bin import yt_url_exploer
 from FUBUKING import config
 enable_special_playchannel = config["music"].getboolean("enable_special_playchannel")
 enable_request_banned_song = config["music"].getboolean("enable_request_banned_song")
