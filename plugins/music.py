@@ -12,10 +12,11 @@ import youtube_dl
 from youtube_dl import YoutubeDL
 #===============
 from bin import ctc, source,config_loader
-from plugins.music_bin import yt_url_exploer
+from plugins.music_bin import yt_url_exploer, queue_exploer
 from FUBUKING import config
 enable_special_playchannel = config["music"].getboolean("enable_special_playchannel")
 enable_request_banned_song = config["music"].getboolean("enable_request_banned_song")
+enable_priorityqueue = config["music"].getboolean("enable_priorityqueue")
 enable_yt_cookie =  config["music"].getboolean("enable_yt_cookie")
 playchannel = config_loader.load_playchannel()
 songs_filter = config_loader.load_songs_filter(config["music"].getboolean("enable_songs_filter"))
@@ -167,8 +168,10 @@ class MusicPlayer:
         self._guild = ctx.guild
         self._channel = ctx.channel
         self._cog = ctx.cog
-
-        self.queue = asyncio.Queue()
+        if enable_priorityqueue :
+            self.queue = asyncio.PriorityQueue()
+        else :
+            self.queue =asyncio.Queue()
         self.next = asyncio.Event()
 
         self.np = None  # Now playing message
@@ -187,7 +190,7 @@ class MusicPlayer:
             try:
                 # Wait for the next song. If we timeout cancel the player and disconnect...
                 async with timeout(300):  # 5 minutes...
-                    source_ = await self.queue.get()
+                    source_ = (await self.queue.get()).item
             except asyncio.TimeoutError:
                 return self.destroy(self._guild)
 
@@ -254,7 +257,7 @@ class MusicPlayer:
                 embed.add_field(name='song_tag', value=f'#{song_type}') 
 
             if self._guild.id in loop_list :
-                await self.queue.put(source_)
+                await self.queue.put(queue_exploer.Prioritize(3, source_))
                 embed.add_field(name='loop mod', value=f'ON')
 
             self.np = await self._channel.send(embed=embed)
@@ -419,7 +422,7 @@ class Music(commands.Cog):
                     source = await YTDLSource.create_source(ctx, song, loop=self.bot.loop, download=False, creat_Queued_message=False)
                     await asyncio.sleep(0.5)
                     if source != False :
-                        await player.queue.put(source)
+                        await player.queue.put(queue_exploer.Prioritize(2,source))
                         if flag == 1 :
                             try:
                                 list_song[ctx.guild.id].append(source['webpage_url'])
@@ -436,7 +439,7 @@ class Music(commands.Cog):
             else :
                 source = await YTDLSource.create_source(ctx, search, loop=self.bot.loop, download=False, creat_Queued_message=True)
                 if source != False :
-                    await player.queue.put(source)
+                    await player.queue.put(queue_exploer.Prioritize(1, source))
         else :
             embed = discord.Embed(title="", description="Please request a song on the designated channel.", color=0xf6ff00)
             await ctx.send(embed=embed)
@@ -565,7 +568,7 @@ class Music(commands.Cog):
             player.queue._queue.pop()
         else:
             try:
-                s = player.queue._queue[pos-1]
+                s = (player.queue._queue[pos-1]).item
                 del player.queue._queue[pos-1]
                 embed = discord.Embed(title="", description=f"Removed [{s['title']}]({s['webpage_url']}) [{s['requester'].mention}]", color=0xf200ff)
                 await ctx.send(embed=embed)
@@ -648,7 +651,7 @@ class Music(commands.Cog):
                 e_color = 0x00ff33
 
             # Grabs the songs in the queue...
-            upcoming = list(itertools.islice(player.queue._queue, q_start, (q_start+10)))
+            upcoming = list(itertools.islice(queue_exploer.queue_expr(player.queue._queue), q_start, (q_start+10)))
             fmt = '\n'.join(f"`{(upcoming.index(_)) + 1 + q_start}.` [{_['title']}]({_['webpage_url']}) | `Requested by: {_['requester']}`\n" for _ in upcoming)
             fmt = f"\n__Now Playing__:\n[{vc.source.title}]({vc.source.web_url}) | ` {duration} Requested by: {vc.source.requester}`\n\n__Up Next:__\n" + fmt +f"{loop_mod}" +f"\n**{len(player.queue._queue)} songs in queue**"
             embed = discord.Embed(title=f'Queue for {ctx.guild.name}', description=fmt, color=e_color)
@@ -749,7 +752,7 @@ class Music(commands.Cog):
         player = self.get_player(ctx)
         vc = ctx.voice_client
         if not player.queue.empty() :
-            upcoming = list(itertools.islice(player.queue._queue, 0, len(player.queue._queue)))
+            upcoming = list(itertools.islice(queue_exploer.queue_expr(player.queue._queue), 0, len(player.queue._queue)))
 
         if not vc or not vc.is_connected():
             embed = discord.Embed(title="", description="I'm not connected to a voice channel", color=0xff0000)
@@ -765,7 +768,7 @@ class Music(commands.Cog):
             await ctx.send(embed=embed)
             if player.queue.empty() or upcoming[-1]["webpage_url"] != vc.source.web_url :
                 s = await YTDLSource.create_source(ctx, vc.source.web_url, loop=self.bot.loop, download=False, creat_Queued_message=False)
-                await player.queue.put(s)
+                await player.queue.put(queue_exploer.Prioritize(3,s))
         else :
             embed = discord.Embed(title="you have already turn on loop mod", description=f"type /break to break the loop", color=0xf6ff00)
             await ctx.send(embed=embed)

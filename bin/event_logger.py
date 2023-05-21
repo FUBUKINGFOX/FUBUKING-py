@@ -1,7 +1,7 @@
 from discord.ext import commands
 from bin import ctc, ctt
 def cmd_error_logger(context: commands.Context,msg) :
-    ctc.printRed(f"{ctt.time_now()}:[CMD]: ERROR     : {context.guild.name}/{context.channel} :: {msg} \n")
+    ctc.printYellow(f"{ctt.time_now()}:[CMD]: ERROR     : {context.guild.name}/{context.channel} :: {msg} \n")
 def cmd_info_logger(context: commands.Context,msg) :
     ctc.printBlue(f"{ctt.time_now()}:[CMD]: INFO      : {context.guild.name}/{context.channel} :: {msg} \n")
 def cmd_warn_logger(context: commands.Context,msg) :
