@@ -4,7 +4,6 @@ import os
 import sys
 import getopt
 import discord 
-from discord import app_commands
 from discord.ext import commands
 #===============
 from bin import ctc, ctt, token, event_logger, source
@@ -12,8 +11,8 @@ from bin.class_init.plugin_init import plugin_init
 
 config = configparser.ConfigParser()
 config.read("./config/config.ini")
-listener_port = config["FUBUKING"].getint("listener_port")
-prefix = ["/","fbk "]
+listener_port = config["MAIN"].getint("listener_port")
+prefix = ["!"]
 intents = discord.Intents.all()
 bot = commands.Bot(intents=intents,command_prefix=prefix)
 #===============app start
@@ -44,7 +43,7 @@ async def shutdown(ctx :commands.Context):
 class commands_error_handler(plugin_init) :
     @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, error):
-        embed = discord.Embed(title="<:SAD:1028588126291120219>Command ERROR :", description=f"{error}", color=0xf6ff00)
+        embed = discord.Embed(title="Command ERROR :", description=f"{error}", color=0xf6ff00)
         await ctx.reply(embed=embed)
         event_logger.cmd_error_logger(ctx, error)
 async def load_error_handler():
@@ -56,6 +55,15 @@ async def load_extensions() :
             await bot.load_extension(f"plugins.{cog_files[:-3]}")
         elif cog_files.endswith(".pyc") :
             await bot.load_extension(f"plugins.{cog_files[:-4]}")
+
+bot.command(name="sync_cmd")
+async def sync_slash_cmd():
+    try :
+        slash_cmd = await bot.tree.sync()
+        event_logger.info_logger(f"upload {len(slash_cmd)} slash command(s)\n")
+    except Exception as error :
+        event_logger.error_logger("failed to upload slash command(s)")
+        print(f"Exception:\n{error}\n")
 
 @bot.command(name="load",description="Load plugin.")
 @commands.is_owner()
@@ -80,7 +88,6 @@ async def reload(ctx, extension):
     await ctx.message.add_reaction('🔄')
     await bot.reload_extension(f'plugins.{extension}')
     await ctx.send(f"succeed reload `{extension}` plugin")
-__file__
 #==========================================================
 @bot.event
 async def on_ready() :
@@ -92,9 +99,10 @@ async def on_ready() :
     ctc.printYellowBlue(u'{0.user.id}\n'.format(bot))
     game = discord.Activity(type=discord.ActivityType.listening, name='YouTube')
     await bot.change_presence(activity=game, status=discord.Status.idle)
+       
     try :
         id = bot.get_channel(listener_port)
-        await id.send(u'💽:{0.user.name}`{0.user.id}`'.format(bot))
+        await id.send(u'💽:{0.user.name}`{0.user.id}`'.format(bot)) 
     except :
         pass
 

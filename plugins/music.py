@@ -33,7 +33,7 @@ youtube_dl.utils.bug_reports_message = lambda: ''
 ytdlopts = {
     'format': 'bestaudio/best',
     'extractaudio': True,
-    'audioformat': 'mp3',
+    'audioformat': 'webm',
     'outtmpl': 'downloads/%(extractor)s-%(id)s-%(title)s.%(ext)s',
     'restrictfilenames': True,
     'noplaylist': True,
@@ -106,7 +106,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
         if flag == 1 :#filt the song 
             if enable_request_banned_song == True :
-                embed = discord.Embed(title="<:bikkuri:1028582291460587592>此歌曲可能不適合部分聽眾", description=f"任何人均有跳過這首歌的權限", color=0xf6ff00)
+                embed = discord.Embed(title="此歌曲可能不適合部分聽眾", description=f"任何人均有跳過這首歌的權限", color=0xf6ff00)
                 await ctx.message.reply(embed=embed)
                 try :
                     banned_song[ctx.guild.id].append(data['webpage_url'])
@@ -115,7 +115,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
                     banned_song[ctx.guild.id] = e
 
                 if creat_Queued_message == True :
-                    embed = discord.Embed(title="", description=f"<:HEY2:1028582334838083596>Queued [{data['title']}]({data['webpage_url']}) [{ctx.author.mention}]", color=0xf6ff00)
+                    embed = discord.Embed(title="", description=f"Queued [{data['title']}]({data['webpage_url']}) [{ctx.author.mention}]", color=0xf6ff00)
                     await ctx.send(embed=embed)
                 if download:
                     source = ytdl.prepare_filename(data)
@@ -124,14 +124,13 @@ class YTDLSource(discord.PCMVolumeTransformer):
                 return cls(discord.FFmpegPCMAudio(source), data=data, requester=ctx.author)#@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
             else :
-                await ctx.send("<:bikkuri:1028582291460587592>")
-                embed = discord.Embed(title="<:YABE:1028581521289908254>YABE", description="", color=0xf6ff00)
+                embed = discord.Embed(title="YABE", description="", color=0xf6ff00)
                 await ctx.send(embed=embed)
                 return False
 
         else :
             if creat_Queued_message == True :
-                embed = discord.Embed(title="", description=f"<:HEY2:1028582334838083596>Queued [{data['title']}]({data['webpage_url']}) [{ctx.author.mention}]", color=0x73bbff)
+                embed = discord.Embed(title="", description=f"Queued [{data['title']}]({data['webpage_url']}) [{ctx.author.mention}]", color=0x73bbff)
                 await ctx.send(embed=embed)
 
             if download:
@@ -244,7 +243,7 @@ class MusicPlayer:
             except KeyError:
                 pass
 
-            embed = (discord.Embed(title='<:foxtail:995271447905833030>Now playing',
+            embed = (discord.Embed(title='Now playing',
                                description=f'```css\n{source.title}\n```',
                                color=e_color)
                  .add_field(name='Duration', value=duration)
@@ -376,7 +375,6 @@ class Music(commands.Cog):
                 raise VoiceConnectionError(f'Connecting to channel: <{channel}> timed out.')
          
         embed = discord.Embed(title=f"connectting to `{channel}` voice_channel...",color=0x73bbff)
-        await ctx.send("<:SUKONBU:1028588709915918386>")
         await ctx.send(embed=embed)
 
     @commands.command(name='play', aliases=['p','PLAY','P'], description="streams music")
@@ -410,7 +408,7 @@ class Music(commands.Cog):
             # If download is True, source will be a discord.FFmpegPCMAudio with a VolumeTransformer.
             if "youtube.com/playlist?list=" in search :
                 songs = yt_url_exploer.search(search)
-                embed = discord.Embed(title="正在載入歌單...", description=f"<a:loading:1039138667953930310>預計載入時間:{round(0.7*len(songs), 2)}sec(s)", color=0xf6ff00)
+                embed = discord.Embed(title="正在載入歌單...", description=f"預計載入時間:{round(0.7*len(songs), 2)}sec(s)", color=0xf6ff00)
                 await ctx.send(embed=embed)
 
                 if len(songs) >= 5:
@@ -519,7 +517,7 @@ class Music(commands.Cog):
             await ctx.message.add_reaction('⏭')
             self.totalvotes.clear()
             vc.stop()
-            embed = discord.Embed(title="執行身分:<:kitunejyai:1028583632136314902>[CORN_filter系統]", description="/skip", color=0x73d7ff)
+            embed = discord.Embed(title="執行身分:[CORN_filter系統]", description="/skip", color=0x73d7ff)
             await ctx.send(embed=embed)
 
         elif ctx.guild.id in list_skip:
@@ -528,14 +526,14 @@ class Music(commands.Cog):
             await ctx.message.add_reaction('⏭')
             self.totalvotes.clear()
             vc.stop()
-            embed = discord.Embed(title="執行身分:<:kitunejyai:1028583632136314902>[CORN_music_list系統]", description="/skip", color=0x73d7ff)
+            embed = discord.Embed(title="執行身分:[CORN_music_list系統]", description="/skip", color=0x73d7ff)
             await ctx.send(embed=embed)
 
         elif ctx.message.author.id in owner_id :
             await ctx.message.add_reaction('⏭')
             self.totalvotes.clear()
             vc.stop()
-            embed = discord.Embed(title="執行身分:<:kitunejyai:1028583632136314902>[系統管理員]", description="/skip", color=0x73d7ff)
+            embed = discord.Embed(title="執行身分:[系統管理員]", description="/skip", color=0x73d7ff)
             await ctx.send(embed=embed)
 
         elif voter not in self.totalvotes :
@@ -740,7 +738,7 @@ class Music(commands.Cog):
             embed = discord.Embed(title="", description="I'm not connected to a voice channel", color=0xff0000)
             return await ctx.send(embed=embed)
 
-        embed = discord.Embed(title="<:disconnect:1081411578517258328>disconnect...",color=0x232323)
+        embed = discord.Embed(title="disconnect...",color=0x232323)
         await ctx.send(embed=embed)
         
 

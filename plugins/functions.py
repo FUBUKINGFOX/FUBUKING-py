@@ -4,11 +4,6 @@ from bin.class_init.plugin_init import plugin_init
 import time
 from bin import config_loader
 class functions(plugin_init):
-    @commands.command()
-    async def cha_happa(self, ctx) :
-        time.sleep(1)
-        await ctx.message.delete()
-        await ctx.send('<:cha:1028744563411656734><:happa:1028744605807681536>')
      #===========================
 
     @commands.command()
@@ -69,20 +64,6 @@ class functions(plugin_init):
             pass
     
      #=========================== 
-    @commands.command()
-    @commands.is_owner()
-    async def send_update_msg(self, ctx):
-        embed = discord.Embed(
-            title="BUG FIX",
-            color=0xff00e1,
-            description="bug 修復"
-            
-        ).add_field(name="module fix" ,value="youtube-dl ==> yt-dlp")
-        i = config_loader.load_playchannel()
-        for i in i :
-            id =  self.bot.get_channel(i)
-            await id.send(embed=embed)
-            time.sleep(0.5)
         
 
 

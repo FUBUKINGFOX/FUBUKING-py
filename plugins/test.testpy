@@ -1,0 +1,10 @@
+import discord
+from discord import app_commands
+from bin.class_init.plugin_init import plugin_init
+class test(plugin_init):
+    @app_commands.command(name="ping", description="show ping.")
+    async def _ping(self, itn: discord.Interaction):
+        await itn.response.send_message(f"ping : {round((self.bot.latency)*1000, 2)}ms")
+    
+async def setup(bot):
+    await bot.add_cog(test(bot))
